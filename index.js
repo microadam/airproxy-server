@@ -25,17 +25,6 @@ try {
   console.log('no initial config')
 }
 
-if (initialConfig) {
-  initialConfig.groups.forEach(function (group) {
-    groupManager.create(group.name)
-    if (group.zones) {
-      group.zones.forEach(function (zoneName) {
-        groupManager.addZone(group.name, zoneName)
-      })
-    }
-  })
-}
-
 server.use('emitter', Emitter)
 server.on('connection', handleConnection)
 
@@ -59,3 +48,20 @@ groupManager.on('change', sendGroupsToAll)
 function sendGroupsToAll() {
   server.send('groups', groupManager.getGroupsWithZoneData())
 }
+
+if (initialConfig) {
+  initialConfig.groups.forEach(function (group) {
+    groupManager.create(group.name)
+  })
+}
+
+zoneManager.on('add', function (zone) {
+  if (!initialConfig) return
+  initialConfig.groups.forEach(function (group) {
+    if (!group.zones) return
+    group.zones.forEach(function (zoneName) {
+      if (zoneName !== zone.name) return
+      groupManager.addZone(group.name, zoneName)
+    })
+  })
+})
