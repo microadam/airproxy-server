@@ -17,6 +17,24 @@ var bunyan = require('bunyan')
       , parser: 'JSON'
       }
     )
+  , initialConfig = null
+
+try {
+  initialConfig = require('./initial-config.json')
+} catch (e) {
+  console.log('no initial config')
+}
+
+if (initialConfig) {
+  initialConfig.groups.forEach(function (group) {
+    groupManager.create({ name: group.name })
+    if (group.zones) {
+      group.zones.forEach(function (zoneName) {
+        groupManager.addZone(group.name, zoneName)
+      })
+    }
+  })
+}
 
 server.use('emitter', Emitter)
 server.on('connection', handleConnection)
