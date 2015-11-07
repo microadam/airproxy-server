@@ -27,7 +27,7 @@ try {
 
 if (initialConfig) {
   initialConfig.groups.forEach(function (group) {
-    groupManager.create({ name: group.name })
+    groupManager.create(group.name)
     if (group.zones) {
       group.zones.forEach(function (zoneName) {
         groupManager.addZone(group.name, zoneName)
