@@ -37,6 +37,9 @@ zoneListener.on('zoneDown', function (zoneName) {
 airProxy.groupManager.on('volumeUp', groupManager.volumeUp.bind(groupManager))
 airProxy.groupManager.on('volumeDown', groupManager.volumeDown.bind(groupManager))
 airProxy.groupManager.on('metadataChange', groupManager.setNowPlaying.bind(groupManager))
+airProxy.groupManager.on('clientConnected', function (groupName) {
+  groupManager.setNowPlaying(groupName, { asar: 'Something', asal: 'is', minm: 'playing' })
+})
 airProxy.groupManager.on('clientDisconnected', function (groupName) {
   groupManager.setNowPlaying(groupName, null)
 })
