@@ -10,20 +10,21 @@ var bunyan = require('bunyan')
   , groupManager = new GroupManager(airProxy, zoneManager)
   , createHandleConnection = require('./lib/connection-handler')
   , handleConnection = createHandleConnection(groupManager, zoneManager)
-  , server = Primus.createServer(
-      { port: 8080
+  , initialConfig = {}
+
+try {
+  initialConfig = require(process.argv[2])
+} catch (e) {
+  logger.info('no initial config')
+}
+
+var server = Primus.createServer(
+      { port: initialConfig.port || 8080
       , transformer: 'websockets'
       , iknowhttpsisbetter: true
       , parser: 'JSON'
       }
     )
-  , initialConfig = null
-
-try {
-  initialConfig = require('./initial-config.json')
-} catch (e) {
-  console.log('no initial config')
-}
 
 server.use('emitter', Emitter)
 server.on('connection', handleConnection)
