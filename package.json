@@ -10,7 +10,7 @@
     "lodash.values": "^3.0.0",
     "primus": "^3.0.2",
     "primus-emitter": "^3.1.0",
-    "ws": "^0.7.1"
+    "ws": "^1.1.0"
   },
   "devDependencies": {},
   "author": "",
