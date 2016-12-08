@@ -8,6 +8,7 @@
 
     {
       "port": 7878,
+      "httpPort": 7979,
       "groups": [
         { "name": "Home",
           "zones": [

@@ -1,15 +1,13 @@
 var bunyan = require('bunyan')
   , logger = bunyan.createLogger({ name: 'airproxy-server' })
   , airProxy = require('airproxy')(logger)
+  , createSocketServer = require('./socket-server')
+  , createHttpServer = require('./http-server')
   , zoneListener = airProxy.zoneListener
-  , Primus = require('primus')
-  , Emitter = require('primus-emitter')
   , ZoneManager = require('./lib/zone-manager')
   , zoneManager = new ZoneManager()
   , GroupManager = require('./lib/group-manager')
   , groupManager = new GroupManager(airProxy, zoneManager)
-  , createHandleConnection = require('./lib/connection-handler')
-  , handleConnection = createHandleConnection(groupManager, zoneManager)
   , initialConfig = {}
 
 try {
@@ -18,16 +16,8 @@ try {
   logger.info('no initial config')
 }
 
-var server = Primus.createServer(
-      { port: initialConfig.port || 8080
-      , transformer: 'websockets'
-      , iknowhttpsisbetter: true
-      , parser: 'JSON'
-      }
-    )
-
-server.use('emitter', Emitter)
-server.on('connection', handleConnection)
+createSocketServer(initialConfig.port || 8080, groupManager, zoneManager)
+createHttpServer(initialConfig.httpPort || 8181, groupManager, zoneManager)
 
 zoneListener.on('zoneUp', zoneManager.add.bind(zoneManager))
 zoneListener.on('zoneDown', function (zoneName) {
@@ -44,14 +34,6 @@ airProxy.groupManager.on('clientConnected', function (groupName) {
 airProxy.groupManager.on('clientDisconnected', function (groupName) {
   groupManager.setNowPlaying(groupName, null)
 })
-
-zoneManager.on('add', sendGroupsToAll)
-zoneManager.on('remove', sendGroupsToAll)
-groupManager.on('change', sendGroupsToAll)
-
-function sendGroupsToAll() {
-  server.send('groups', groupManager.getGroupsWithZoneData())
-}
 
 if (initialConfig) {
   initialConfig.groups.forEach(function (group) {
